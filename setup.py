@@ -9,7 +9,7 @@ setuptools.setup(
     name="ec2_instance",
     version="0.0.1",
 
-    description="An empty CDK Python app",
+    description="Create EC2 instance with SSM management role",
     long_description=long_description,
     long_description_content_type="text/markdown",
 
@@ -19,7 +19,10 @@ setuptools.setup(
     packages=setuptools.find_packages(where="ec2_instance"),
 
     install_requires=[
-        "aws-cdk.core==1.36.0",
+        "aws-cdk.core==1.36.1",
+        "aws-cdk.aws_ec2",
+        "aws-cdk.aws_iam",
+        "aws-cdk.aws_ssm",
     ],
 
     python_requires=">=3.6",
