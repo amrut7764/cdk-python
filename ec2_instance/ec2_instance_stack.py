@@ -2,6 +2,7 @@ from aws_cdk import (
     aws_ec2 as _ec2,
     aws_iam as _iam,
     aws_ssm as _ssm,
+    aws_cloudwatch as _cw,
     core,
 )
 
@@ -16,6 +17,9 @@ Required Parameters:
     [SSH CIDR] - Create a SSM parameter store\
          non-secure string with "/cdk/ec2/sshLocation"
         example: 10.10.0.0/16 or 10.10.10.1/32
+    [CDK_DEFAULT_REGION] - Set environment variables on command prompt
+     using export for the stack
+    CDK_DEFAULT_ACCOUNT] - https://github.com/aws/aws-cdk/issues/4846
 """
 
 # Read User Data from user_data directory
@@ -95,6 +99,23 @@ class Ec2InstanceStack(core.Stack):
             user_data=_ec2.UserData.custom(user_data)
         )
 
+        # Create a CloudWatch Alarm for EC2 instance CPU utilization
+        metric = _cw.Metric(metric_name="CPUUtilization", namespace="AWS/EC2",
+                            dimensions={
+                                "InstanceId": ec2_instance.instance_id,
+                            },
+                            statistic="Average"
+                            )
+
+        cpu_alarm = _cw.Alarm(
+            self, "cpu_alarm", alarm_name="CPUUtilizationOver15",
+            alarm_description="CPU Utilization Over 15 Percent",
+            evaluation_periods=3, threshold=15,
+            period=core.Duration.seconds(60),
+            metric=metric, datapoints_to_alarm=2,
+            comparison_operator=_cw.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD
+        )
+
         # CFN outputs
         ec2_instance_id = core.CfnOutput(
             self, "instance_id", value=ec2_instance.instance_id,
@@ -116,3 +137,8 @@ class Ec2InstanceStack(core.Stack):
             value=ec2_instance.instance_public_ip,
             description="Public IP address of the newly created EC2"
         )
+
+        cloudwatch_alarm = core.CfnOutput(
+            self, "Cloudwatch Alarm",
+            value=cpu_alarm.alarm_arn,
+            description="CPU alarm ARN")
