@@ -19,7 +19,7 @@ Required Parameters:
         example: 10.10.0.0/16 or 10.10.10.1/32
     [CDK_DEFAULT_REGION] - Set environment variables on command prompt
      using export for the stack
-    CDK_DEFAULT_ACCOUNT] - https://github.com/aws/aws-cdk/issues/4846
+    [CDK_DEFAULT_ACCOUNT] - https://github.com/aws/aws-cdk/issues/4846
 """
 
 # Read User Data from user_data directory
@@ -63,6 +63,7 @@ class Ec2InstanceStack(core.Stack):
 
         # Add an ingress rules for above security group
         add_securitygroup_ingress_for_22 = my_security_group.add_ingress_rule(
+            # BUG 1 Invalid IPv4 CIDR: "dummy-value-for-"
             peer=_ec2.Peer.ipv4(allow_ssh_web_location),
             connection=_ec2.Port.tcp(22)
         )
