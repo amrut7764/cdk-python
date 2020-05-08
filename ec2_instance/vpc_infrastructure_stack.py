@@ -25,7 +25,8 @@ class VpcInfrastructureStack(core.Stack):
 
         # TODO IPv6WorkAround for subnet cidr allocation.
         # https://github.com/aws/aws-cdk/issues/894#issuecomment-606140766
-        assign_ipv6 = _ec2.CfnVPCCidrBlock(self, "testabd", vpc_id=vpc.ref,
+        id = hashlib.md5(f'ipv6cidrblock'.encode()).hexdigest()
+        assign_ipv6 = _ec2.CfnVPCCidrBlock(self, f'ipv6cidr-{id}', vpc_id=vpc.ref,
                                            amazon_provided_ipv6_cidr_block=True)
 
         # Create an Internet Gateway and attach it to the VPC
